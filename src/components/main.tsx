@@ -1,18 +1,19 @@
-import {Input} from "./ui/input.tsx";
-import {Button} from "./ui/button.tsx";
 import {FormEvent, useEffect, useRef, useState} from "react";
 import type {pal} from "../types/pal.d.tsx";
+import {ComboboxForm} from "./searchForm.tsx";
+
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 async function sendGuess(name: string): Promise<pal | null> {
-    const response = await fetch(`https://fastapi-production-e412.up.railway.app/Pal='${name}'`)
+    const response = await fetch(`${BASE_URL}/Pal=${name}`)
     if (!response.ok) {
         throw new Error(response.statusText)
     }
     return await response.json();
 }
 
-async function getRandomPal(): Promise<{"Pal":string}> {
-    const response = await fetch(`https://fastapi-production-e412.up.railway.app/RandomPal`)
+async function getRandomPal(): Promise<string> {
+    const response = await fetch(`${BASE_URL}/randomPal`)
     if (!response.ok) {
         throw new Error(response.statusText)
     }
@@ -20,42 +21,19 @@ async function getRandomPal(): Promise<{"Pal":string}> {
 }
 
 function Main() {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [guesses, setGuesses] = useState<[pal] | []>([]);
+    const [guesses, setGuesses] = useState<pal[] | []>([]);
     const [actualPal, setActualPal] = useState<pal | null>(null);
 
     useEffect(() => {
-        getRandomPal().then((data) => {
-            console.log(data.Pal)
-            sendGuess(data.Pal).then((pal) => {
-                console.log(pal)
-                setActualPal(pal);
-            })
+        console.log(BASE_URL)
+        getRandomPal().then((palName) => {
+            sendGuess(palName).then((pal) => setActualPal(pal))
         })
     }, [])
 
-    const handleSubmit = (event: FormEvent) => {
-        event.preventDefault();
-        console.log(inputRef.current?.value)
-        sendGuess(inputRef.current!.value).then((data) => {
-            if(data){
-                console.log(data)
-                setGuesses([...guesses, data]);
-            } else {
-                alert("No pal found")
-            }
-
-        })
-
-        inputRef.current!.value = "";
-    }
-
     return (
         <div>
-            <form className="inline-flex gap-2 mb-3" onSubmit={handleSubmit}>
-                <Input type="text" placeholder="Guess pal" ref={inputRef}/>
-                <Button type="submit"> Guess </Button>
-            </form>
+            <ComboboxForm actualPal={actualPal} setGuesses={setGuesses} guesses={guesses}/>
             <table className="bg-white m-auto rounded-md">
                 <tbody>
                     <tr>
