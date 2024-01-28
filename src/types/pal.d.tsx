@@ -1,3 +1,5 @@
+export type elements = "Water" | "Fire" | "Dark" | "Dragon" | "Electricity" | "Ice" | "Grass" | "Ground" | "Neutral"
+
 export type pal = {
     Paldeck: {
         PalName: string,
@@ -6,8 +8,8 @@ export type pal = {
         PalAppearance: string
     },
     Elements: {
-        Element1: string,
-        Element2: string
+        Element1: elements,
+        Element2: elements
     },
     Drops: {
         Drop1: string,
